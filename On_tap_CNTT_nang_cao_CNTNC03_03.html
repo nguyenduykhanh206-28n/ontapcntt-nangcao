@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ôn tập CNTT nâng cao – CNTNC03_03</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#17243a;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--blue2:#dbeafe;--green:#15803d;--red:#b91c1c;--amber:#b45309}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(120deg,#102b52,#1d4ed8);color:white;padding:25px 18px}
+.wrap{max-width:1100px;margin:auto;padding:0 14px}
+h1{font-size:clamp(22px,4vw,32px);margin:0 0 5px}header p{margin:0;color:#dbeafe}
+main{padding:18px 0 50px}.topgrid{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-bottom:14px}
+.panel,.question,.result{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 4px 14px #0f172a08}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.controls label{font-size:14px;color:var(--muted)}
+select,button{font:inherit;border-radius:10px;border:1px solid var(--line);padding:9px 12px;background:white;color:var(--ink)}
+button{cursor:pointer;font-weight:650}button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}button:disabled{opacity:.45;cursor:not-allowed}
+.stats{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:14px}.stats strong{color:var(--ink)}
+.progress{height:9px;background:#e8eef7;border-radius:20px;overflow:hidden;margin-top:10px}.progress>div{height:100%;width:0;background:var(--blue);transition:width .2s}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tab{border-radius:999px;padding:8px 13px}.tab.active{background:var(--blue2);border-color:#93c5fd;color:#1d4ed8}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:14px;align-items:start}
+.qhead{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--muted);font-size:14px}
+.question h2{font-size:19px;line-height:1.45;margin:10px 0 16px}
+.opt{display:flex;gap:11px;align-items:flex-start;border:1px solid var(--line);padding:12px;border-radius:12px;margin:9px 0;cursor:pointer;transition:.15s}
+.opt:hover{border-color:#93c5fd;background:#f8fbff}.opt input{margin-top:5px;accent-color:var(--blue);transform:scale(1.1)}
+.opt.selected{border-color:var(--blue);background:#eff6ff}.opt.correct{border-color:#86efac;background:#f0fdf4}.opt.wrong{border-color:#fca5a5;background:#fef2f2}
+.letter{font-weight:800;color:var(--blue);min-width:20px}
+.nav{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
+.side h3{margin:0 0 10px;font-size:16px}.numbers{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}
+.num{padding:7px 0;text-align:center;font-size:13px}.num.done{background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}.num.current{outline:2px solid var(--blue);outline-offset:1px}.num.flag{background:#fef3c7;border-color:#fcd34d}
+.note{font-size:13px;color:var(--muted);margin-top:12px}.feedback{margin-top:14px;padding:12px;border-radius:10px;font-size:14px}.feedback.good{background:#f0fdf4;color:#166534}.feedback.bad{background:#fef2f2;color:#991b1b}.feedback.info{background:#fffbeb;color:#92400e}
+.result{margin-top:14px}.result h2{margin-top:0}.score{font-size:34px;font-weight:850;color:var(--blue)}
+.hidden{display:none!important}.small{font-size:13px;color:var(--muted)}
+@media(max-width:760px){.topgrid,.layout{grid-template-columns:1fr}.side{order:-1}.numbers{grid-template-columns:repeat(10,1fr)}.question{padding:14px}.question h2{font-size:17px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>Ôn tập Công nghệ thông tin nâng cao</h1><p>Mã đề CNT-TNC03_3 · 60 câu trắc nghiệm · Thời gian tham khảo: 60 phút</p></div></header>
+<main class="wrap">
+<div class="topgrid">
+ <section class="panel">
+  <div class="controls">
+   <label for="mode">Chế độ</label><select id="mode"><option value="practice">Ôn tập – hiện đáp án sau mỗi câu</option><option value="exam">Thi thử – chấm điểm cuối bài</option></select>
+   <label for="scope">Phạm vi</label><select id="scope"><option value="all">Toàn bộ 60 câu</option><option value="word">Microsoft Word (1–20)</option><option value="excel">Microsoft Excel (21–40)</option><option value="ppt">PowerPoint (41–60)</option></select>
+   <button id="shuffle">Trộn câu hỏi</button><button id="reset">Làm lại</button>
+  </div>
+  <div class="stats" style="margin-top:13px"><span>Đã trả lời: <strong id="answered">0</strong></span><span>Còn lại: <strong id="remaining">60</strong></span><span>Thời gian: <strong id="timer">60:00</strong></span></div>
+  <div class="progress"><div id="bar"></div></div>
+ </section>
+ <section class="panel">
+  <strong>Hướng dẫn làm bài</strong>
+  <p class="small">Chọn một phương án cho mỗi câu. Ở chế độ Ôn tập, hệ thống phản hồi ngay sau khi chọn. Ở chế độ Thi thử, chọn <b>Nộp bài</b> để xem kết quả và đáp án.</p>
+  <div class="controls"><button class="primary" id="submit">Nộp bài</button><button id="review" disabled>Xem câu sai / chưa làm</button></div>
+ </section>
+</div>
+<div class="tabs" id="tabs">
+ <button class="tab active" data-filter="all">Tất cả</button><button class="tab" data-filter="word">Word</button><button class="tab" data-filter="excel">Excel</button><button class="tab" data-filter="ppt">PowerPoint</button>
+</div>
+<div class="layout">
+ <section>
+  <article class="question" id="questionCard">
+   <div class="qhead"><span id="qcount">Câu 1 / 60</span><span id="section">Microsoft Word</span></div>
+   <h2 id="qtext"></h2><div id="options"></div><div id="feedback" class="hidden"></div>
+   <div class="nav"><button id="prev">← Câu trước</button><div class="controls"><button id="clear">Bỏ chọn</button><button class="primary" id="next">Câu tiếp →</button></div></div>
+  </article>
+  <section id="result" class="result hidden"></section>
+ </section>
+ <aside class="panel side"><h3>Danh sách câu hỏi</h3><div class="numbers" id="numbers"></div><p class="note">Màu xanh: đã trả lời · Viền xanh: câu đang xem · Vàng: cần xem lại.</p><button id="mark" style="width:100%;margin-top:8px">☆ Đánh dấu xem lại</button></aside>
+</div>
+<p class="small" style="margin-top:15px">Lưu ý về đáp án: Tệp đề gốc không kèm đáp án. Đáp án trong công cụ là đáp án tham khảo được suy luận từ nội dung câu hỏi và kiến thức phần mềm; các câu có lỗi/độ mơ hồ được đánh dấu riêng, không tính điểm nếu chưa có đáp án chắc chắn.</p>
+</main>
+<script>
+const BANK = [{"n": 1, "q": "Trong bảng Word, Insert Below chèn dòng nào?", "o": ["Bên trên", "Bên dưới", "Bên trái", "Bên phải"], "a": [1]}, {"n": 2, "q": "Trong Microsoft Word, muốn tạo tính năng hình mờ trong Word ta chọn:", "o": ["Insert → Signature Line → Custom Watermark → Text watermark", "Insert → Clip Art → Custom Watermark → Text watermark", "View Web Layout → Custom Watermark → Text watermark", "Design → Watermark → Custom Watermark → Text watermark"], "a": [3]}, {"n": 3, "q": "Trong Microsoft Word, muốn chèn ngày vào biểu mẫu ta sử dụng công cụ:", "o": ["Rich Text", "Check Box", "Combo Box", "Date Picker"], "a": [3]}, {"n": 4, "q": "Trong Word, WordArt chủ yếu dùng cho:", "o": ["Văn bản nghệ thuật", "Bảng biểu", "Hình nền", "Công thức"], "a": [0]}, {"n": 5, "q": "Trong Microsoft Word, chức năng Mail Merge có thể dùng tập tin loại nào để làm dữ liệu nguồn?", "o": ["Excel", "Word", "Microsoft Access", "Cả 3 phương án A, B, C đều đúng"], "a": [3]}, {"n": 6, "q": "Trong Microsoft Word, để xóa đánh dấu (Bookmark) cho một khối văn bản ta thực hiện:", "o": ["View → Bookmark → chọn tên → Delete", "Insert → Bookmark → chọn tên → Delete", "Page Layout → Bookmark → chọn tên → Delete", "File → Bookmark → chọn tên → Delete"], "a": [1]}, {"n": 7, "q": "Trong Microsoft Word, để chèn trang đầu, trang cuối khác nhau cho mỗi phân đoạn, ta thực hiện:", "o": ["Layout → Breaks → Next Page, sau đó Insert → Page Numbers → Format Page Numbers → Start at", "Insert → Breaks → Next Page, sau đó Insert → Page Numbers → Format Page Numbers → Start at", "View → Breaks → Next Page, sau đó Insert → Page Numbers → Format Page Numbers → Start at", "Review → Breaks → Next Page, sau đó Insert → Page Numbers → Format Page Numbers → Start at"], "a": [0]}, {"n": 8, "q": "Chế độ In Front of Text đặt hình ảnh ở vị trí nào?", "o": ["Dưới văn bản", "Trong đoạn", "Trên văn bản", "Ngoài lề"], "a": [2]}, {"n": 9, "q": "Trong Word, phím F3 dùng để thực thi:", "o": ["Find", "Replace", "AutoText", "Print"], "a": [2]}, {"n": 10, "q": "Trong bảng Word, Alt + Home đưa con trỏ đến:", "o": ["Ô đầu dòng", "Ô cuối dòng", "Ô đầu cột", "Ô cuối cột"], "a": [0]}, {"n": 11, "q": "Trong Microsoft Word, muốn đặt khoảng cách giữa các dòng trong đoạn hiện tại ta chọn:", "o": ["Paragraph Settings → Indents and Spacing → Line spacing", "Paragraph Settings → Indents and Spacing → Special", "Page Layout → Line Numbers", "Page Layout → Orientation"], "a": [0]}, {"n": 12, "q": "Trong Microsoft Word, muốn tùy chỉnh vị trí hình ảnh so với văn bản, ta thực hiện:", "o": ["Nhấn chuột phải vào hình chọn Copy", "Nhấn chuột phải vào hình chọn Cut", "Nhấn chuột phải vào hình chọn Define", "Nhấn chuột phải vào hình chọn Wrap Text"], "a": [3]}, {"n": 13, "q": "Trong Find and Replace, Replace All dùng để:", "o": ["Tìm một từ", "Thay từng từ", "Thay tất cả kết quả", "Xóa văn bản"], "a": [2]}, {"n": 14, "q": "Trong Microsoft Word, muốn bỏ tính năng hình mờ trong Word ta chọn:", "o": ["Insert → Signature Line → Custom Watermark → Remove watermark", "Design → Watermark → Remove Watermark", "Insert → Clip Art → Custom Watermark → Text watermark", "View → Web Layout → Custom Watermark → Remove watermark"], "a": [1]}, {"n": 15, "q": "Theo đề thi, điều hướng văn bản cho phép ta quay văn bản theo mấy hướng?", "o": ["1", "2", "3", "4"], "a": [1]}, {"n": 16, "q": "Watermark có thể tạo dưới dạng:", "o": ["Văn bản hoặc hình ảnh", "Bảng hoặc biểu đồ", "Âm thanh hoặc video", "Công thức hoặc hàm"], "a": [0]}, {"n": 17, "q": "Trong hộp thoại Paragraph của Microsoft Word, tính năng Spacing dùng để:", "o": ["Điều chỉnh thụt đầu dòng trong đoạn văn bản", "Căn trái cho văn bản", "Định dạng chữ nghiêng", "Điều chỉnh khoảng cách giữa các đoạn văn bản"], "a": [3]}, {"n": 18, "q": "Trong Microsoft Word, để thay đổi lề văn bản trong một ô, ta chọn văn bản trong ô cần thay đổi rồi thao tác:", "o": ["Layout → Cell Margins", "Home → Cell Margins", "Layout → Cell Margins", "File → Cell Margins"], "a": [0]}, {"n": 19, "q": "Muốn điều chỉnh Ribbon trong Microsoft Word (ẩn/hiện, thay đổi chức năng...), ta thực hiện:", "o": ["File → Options → Quick Access Toolbar", "File → Options → Advanced", "View → Draft", "References → Manage Sources"], "a": []}, {"n": 20, "q": "Trong Microsoft Word, thao tác Alt + Home trong bảng biểu có chức năng:", "o": ["Đưa con trỏ về ô đầu tiên của cột hiện tại", "Đưa con trỏ về ô cuối của cột hiện tại", "Đưa con trỏ về ô đầu của dòng hiện tại", "Đưa con trỏ về ô cuối của dòng hiện tại"], "a": [2]}, {"n": 21, "q": "Trong Microsoft Excel, muốn sắp xếp dữ liệu sau khi quét khối vùng dữ liệu ta chọn:", "o": ["Data → Filter", "Data → Index", "Home → Sort", "Data → Sort"], "a": [3]}, {"n": 22, "q": "Trong Microsoft Excel, để ẩn cột, ta thực hiện:", "o": ["Data → Cells → Format → Hide & Unhide → Hide Columns", "Home → Cells → Format → Hide & Unhide → Hide Columns", "Formulas → Cells → Format → Hide & Unhide → Hide Columns", "View → Cells → Format → Hide & Unhide → Hide Columns"], "a": [1]}, {"n": 23, "q": "Trong Microsoft Excel, công thức =VALUE(RIGHT(\"NKA015\",3)) cho kết quả:", "o": ["“015”", "15", "Báo lỗi #VALUE!", "Kết quả khác"], "a": [1]}, {"n": 24, "q": "Trong Microsoft Excel để chèn siêu liên kết, ta thực hiện:", "o": ["Home → Hyperlink", "Insert → Hyperlink", "View → Hyperlink", "Data → Hyperlink"], "a": [1]}, {"n": 25, "q": "Trong Microsoft Excel cú pháp hàm COUNTIF nào đúng?", "o": ["COUNTIF(range,criteria)", "COUNTIF(criteria,range)", "COUNTIF(criteria,range,col_index_num)", "COUNTIF(range>criteria,col_index_num)"], "a": [0]}, {"n": 26, "q": "Để chặn người sử dụng thực hiện một số hành động nhất định trong Microsoft Excel, ta dùng chức năng gì?", "o": ["Protect → Protect Workbook", "Review → Protect Workbook", "Review → Workbook", "Review → Share Workbook"], "a": [1]}, {"n": 27, "q": "Biểu thức =(A1+B1)*C1 khác =A1+B1*C1 chủ yếu do:", "o": ["Kiểu dữ liệu", "Tham chiếu tuyệt đối", "Thứ tự ưu tiên phép toán", "Hàm Excel"], "a": [2]}, {"n": 28, "q": "Hệ thống dòng kẻ Microsoft Excel (các phiên bản hiện đại) có:", "o": ["65.536 dòng và 256 cột", "1.048.576 hàng và 16.384 cột", "2.512.847 hàng và 26.485 cột", "Cả 3 phương án A, B và C đều sai"], "a": [1]}, {"n": 29, "q": "Chức năng của PivotTable trong Microsoft Excel là:", "o": ["Phân tích và thống kê dữ liệu", "Sắp xếp và thống kê dữ liệu", "Phân tích và lọc dữ liệu", "Sắp xếp và lọc dữ liệu"], "a": [0]}, {"n": 30, "q": "A1:A6 chứa 5, 8, 8, 10, 12, 8. Công thức =COUNTIF(A1:A6,8) cho kết quả:", "o": ["2", "3", "4", "5"], "a": [1]}, {"n": 31, "q": "Trong Microsoft Excel, hàm dùng để chuyển chuỗi số sang số là hàm:", "o": ["LEFT(chuỗi,n)", "RIGHT(chuỗi,n)", "MID(chuỗi,m,n)", "VALUE(chuỗi số)"], "a": [3]}, {"n": 32, "q": "Trong Microsoft Excel, biểu đồ loại nào thích hợp hiển thị giá trị dưới dạng phần trăm?", "o": ["Line", "Column", "Pie", "Percentage"], "a": [2]}, {"n": 33, "q": "Muốn sửa tên một vùng trong Microsoft Excel ta thực hiện:", "o": ["Page Layout → Name Manager → Edit", "Data → Name Manager → Edit", "Insert → Name Manager → Edit", "Formulas → Name Manager → Edit"], "a": [3]}, {"n": 34, "q": "Trong Microsoft Excel muốn che dấu (Hide) công thức, ta thực hiện:", "o": ["Chọn ô → Format Cells → Protection → Hidden, sau đó Protect Sheet", "Chọn ô → Home → Format Protection → Locked → Protect Sheet", "Chọn ô → Format Cells → Number → Hide, sau đó Protect Sheet", "Chọn ô → Format Cells → Protection → Hide, sau đó Protect Sheet"], "a": [0]}, {"n": 35, "q": "Công thức =$A$1+B2 được sao chép từ C2 sang E4. Phần nào giữ nguyên hoàn toàn?", "o": ["Cả A1 và B2", "Chỉ A1", "Chỉ B2", "Không phần nào"], "a": [1]}, {"n": 36, "q": "Với A1=125, B1=37, công thức nào cho số nhóm đầy đủ và số dư theo dạng \"3 nhóm - 14\"?", "o": ["=INT(A1/B1)&\" nhóm - \"&MOD(A1,B1)", "=MOD(A1/B1)&\" nhóm - \"&INT(A1,B1)", "=VALUE(A1/B1)&\" nhóm - \"&MOD(A1,B1)", "=ROUND(A1/B1,0)&\" nhóm - \"&MOD(A1,B1)"], "a": [0]}, {"n": 37, "q": "Trong Microsoft Excel, phát biểu nào sau đây là sai?", "o": ["Khi tính toán giá trị một ô bằng hàm hay biểu thức phải bắt đầu bằng dấu =", "Tên hàm nhập chữ thường hay chữ hoa đều có giá trị như nhau", "Giữa tên hàm và các đối số có thể chứa ký tự khoảng trắng", "Các giá trị chuỗi ghi trực tiếp trong hàm phải đặt trong cặp dấu nháy kép"], "a": [2]}, {"n": 38, "q": "Trong Microsoft Excel, A1, A2, A3 lần lượt chứa 234, 235, 236. Công thức =ROUND(SUM(A1:A3),-1) cho kết quả:", "o": ["710", "649", "578", "705"], "a": [0]}, {"n": 39, "q": "Trong Microsoft Excel, công thức nào dưới đây là đúng?", "o": ["=SUM(A1);SUM(A7)", "=SUM(A1):SUM(A7)", "=SUM(A1/A7)", "=SUM(A1:A7)"], "a": [3]}, {"n": 40, "q": "Cách đặt mật khẩu cho file Excel theo các lựa chọn của đề:", "o": ["File → Save → Tools → Web Option", "File → Save → Tools → Properties", "File → Info → Protect Workbook", "Home → Save → Tools → Workbook"], "a": [2]}, {"n": 41, "q": "Trong PowerPoint 2016, muốn thay đổi kích thước trang chiếu theo tỷ lệ màn hình, ta sử dụng:", "o": ["Slide Orientation", "Custom Slide Size", "Format Background", "Presentation View"], "a": [1]}, {"n": 42, "q": "Muốn sắp xếp các Slide trong PowerPoint 2016, ta thực hiện:", "o": ["Insert → Slide Sorter", "File → Slide Sorter", "View → Slide Sorter", "Edit → Slide Sorter"], "a": [2]}, {"n": 43, "q": "Trong PowerPoint 2016, muốn chèn các Slide từ một tập tin khác vào tập tin đang mở, ta dùng:", "o": ["Insert → New Slide → Slide from Outline", "File → New Slide → Reuse Slides", "Insert → Duplicate Slide", "Insert → New Slide"], "a": [1]}, {"n": 44, "q": "Trong PowerPoint 2016, để thay đổi kiểu chữ nghệ thuật (WordArt), ta chọn WordArt và thực hiện:", "o": ["Format → Text Effects → Transform", "Format → Text Outline → Transform", "Format → Text Fill → Transform", "Format → Text Effects → Transform"], "a": [3]}, {"n": 45, "q": "Trong PowerPoint 2016, muốn chuyển đối tượng vẽ từ lớp dưới cùng của nhiều lớp lên trên một lớp, ta dùng:", "o": ["Home → Arrange → Bring Forward", "Home → Arrange → Bring to Front", "Home → Arrange → Send Backward", "Home → Arrange → Send to Back"], "a": [0]}, {"n": 46, "q": "Trong PowerPoint 2016, thiết lập thời gian/tốc độ thực hiện hiệu ứng trong Animation → Timing, ta chọn:", "o": ["Start", "Duration", "Delay", "After"], "a": [1]}, {"n": 47, "q": "Trong PowerPoint 2016, lưu mẫu đang có thành mẫu (.potx) mới, ta thực hiện:", "o": ["File → Save As → PowerPoint Presentation", "File → Save As → PowerPoint Template", "File → Save As → Office Theme", "File → Save As → PDF"], "a": [1]}, {"n": 48, "q": "Trong PowerPoint 2016, tổ hợp phím nào theo đề để vào Full Page Slide khi in?", "o": ["ALT+I+P+W", "CTRL+F+P+W", "ALT+W+P+W", "ALT+F+P+H"], "a": [3]}, {"n": 49, "q": "Trong PowerPoint 2016, chọn phát biểu sai:", "o": ["Có thể cho xuất hiện lần lượt từng từ trong khối văn bản", "Sau khi tạo hiệu ứng động cho đối tượng thì không thể thay đổi kiểu hiệu ứng", "Có thể tạo hiệu ứng chuyển trang cho một slide bất kỳ", "Có thể tạo hiệu ứng chuyển trang cho tất cả slide"], "a": [1]}, {"n": 50, "q": "Trong PowerPoint 2016, chọn Wipe ở Transitions và đặt Duration = 1.5 nghĩa là:", "o": ["Thời gian hiệu ứng Wipe và thời gian slide là 1,5 giây", "Thời gian thực thi hiệu ứng Wipe là 1,5 giây", "Thời gian chờ để bắt đầu hiệu ứng Wipe là 1,5 giây", "Điều chỉnh thời gian chuyển slide lên 1,5 giây"], "a": [1]}, {"n": 51, "q": "Trong PowerPoint 2016, ở thẻ Transitions chọn After = 00:05 và Apply to All sẽ:", "o": ["Mỗi slide tự chuyển sau 5 giây, tính từ khi slide bắt đầu", "Chỉ cần nhấp chuột một lần, slide tự trình chiếu 5 giây", "Các slide không tự động trình chiếu", "Các slide phải trình chiếu lâu hơn 5 giây"], "a": [0]}, {"n": 52, "q": "Trong PowerPoint 2016, Hyperlink dùng để tạo liên kết đến:", "o": ["Slide trong cùng bài thuyết trình", "Slide ở bài thuyết trình khác", "Địa chỉ email, trang web, tập tin", "Cả 3 phương án A, B, C đều đúng"], "a": [3]}, {"n": 53, "q": "Một slide cần tự động chuyển sau 5 giây nhưng vẫn giữ hiệu ứng chuyển trang. Thiết lập cần ưu tiên là:", "o": ["After", "Duration", "Delay", "On Mouse Click"], "a": [0]}, {"n": 54, "q": "Trong PowerPoint 2016, khi trình chiếu Slide Show, để xóa tất cả dấu mực trên slide, ta thực hiện:", "o": ["Pen Tools góc dưới bên trái → Eraser", "Pen Tools góc dưới bên trái → Erase All Ink on Slide", "Pen Tools góc dưới bên phải → Eraser", "Pen Tools góc dưới bên phải → Erase All Ink on Slide"], "a": [1]}, {"n": 55, "q": "Trong PowerPoint, để thêm ghi chú cho hình ảnh/đồ thị trong Slide, ta thực hiện:", "o": ["View → Presentation View → Notes Page và nhập ghi chú", "View → Presentation View → Normal và nhập ghi chú", "Chọn Notes ở cuối màn hình Normal View và nhập ghi chú", "Đáp án A và C đúng"], "a": [3]}, {"n": 56, "q": "Trong PowerPoint 2016, muốn nhóm nhiều đối tượng để chúng luôn di chuyển/thay đổi kích thước cùng nhau, ta thực hiện:", "o": ["Chọn đối tượng → View → Group → Group", "Format → Group → Group", "Chọn đối tượng → Design → Group → Group", "Chọn đối tượng → Format → Group → Group"], "a": [3]}, {"n": 57, "q": "Chọn câu sai khi thiết kế giáo án điện tử bằng PowerPoint 2016:", "o": ["Không thể căn chỉnh thẳng hàng các hộp text box bằng nút lệnh", "Design → Background có thể định dạng màu nền slide", "Home → Editing → Replace sẽ đổi font chữ cho tất cả slide", "Không thể tạo hiệu ứng động cho đối tượng trong slide master"], "a": [0]}, {"n": 58, "q": "Trong PowerPoint 2016, muốn hai hiệu ứng bắt đầu đồng thời, thiết lập hiệu ứng thứ hai là:", "o": ["After Previous", "With Previous", "On Mouse Click", "After Delay"], "a": [1]}, {"n": 59, "q": "Lựa chọn nào sau đây thuộc thẻ View trong PowerPoint 2016?", "o": ["Slide Sorter", "Notes Page", "Outline View", "Cả 3 phương án A, B, C đều đúng"], "a": [3]}, {"n": 60, "q": "Trong PowerPoint 2016, muốn thay đổi thiết kế nhưng giữ nguyên nội dung các slide, ta chọn:", "o": ["Home → Layout", "Design → Themes", "Insert → Object", "View → Master"], "a": [1]}];
+const uncertain = new Set([15,19,57]);
+const explanations = {
+ 15:"Câu diễn đạt chưa rõ ngữ cảnh “điều hướng văn bản/quay văn bản”; cần đối chiếu tài liệu giảng dạy hoặc đáp án chính thức.",
+ 19:"Các lựa chọn không có mục Customize Ribbon. Trong Word, tùy chỉnh Ribbon thường vào File → Options → Customize Ribbon. Câu này không có phương án chính xác.",
+ 57:"Câu có khả năng mơ hồ: phương án A sai vì PowerPoint có công cụ Align để căn chỉnh; phương án C cũng diễn đạt chưa chính xác nếu hiểu Replace là thay thế văn bản thông thường. Cần đối chiếu đáp án chính thức."
+};
+let activeFilter="all", list=BANK.map(x=>x.n), idx=0, answers={}, marked=new Set(), submitted=false, seconds=3600, timerId=null;
+const $=id=>document.getElementById(id);
+function group(n){return n<=20?"word":n<=40?"excel":"ppt"}
+function section(n){return n<=20?"Microsoft Word":n<=40?"Microsoft Excel":"Microsoft PowerPoint 2016"}
+function current(){return BANK.find(x=>x.n===list[idx])}
+function render(){
+ const q=current(); if(!q)return;
+ $("qcount").textContent=`Câu ${idx+1} / ${list.length} · Câu gốc ${q.n}`;
+ $("section").textContent=section(q.n); $("qtext").textContent=q.q;
+ $("options").innerHTML="";
+ q.o.forEach((v,i)=>{
+  const lab=document.createElement("label");lab.className="opt"+(answers[q.n]===i?" selected":"");
+  if(submitted && q.a.length){if(q.a.includes(i))lab.classList.add("correct");else if(answers[q.n]===i)lab.classList.add("wrong")}
+  const radio=document.createElement("input");radio.type="radio";radio.name="answer";radio.checked=answers[q.n]===i;radio.disabled=submitted;
+  radio.addEventListener("change",()=>choose(q.n,i));
+  const letter=document.createElement("span");letter.className="letter";letter.textContent="ABCD"[i]+".";
+  const txt=document.createElement("span");txt.textContent=v;
+  lab.append(radio,letter,txt);$("options").append(lab);
+ });
+ $("feedback").className="hidden";
+ if($("mode").value==="practice" && answers[q.n]!==undefined){
+   showFeedback(q);
+ }
+ $("prev").disabled=idx===0;$("next").disabled=idx===list.length-1;
+ $("numbers").innerHTML="";
+ list.forEach((n,i)=>{const b=document.createElement("button");b.className="num"+(answers[n]!==undefined?" done":"")+(i===idx?" current":"")+(marked.has(n)?" flag":"");b.textContent=n;b.onclick=()=>{idx=i;render()};$("numbers").append(b)});
+ updateStats();
+}
+function choose(n,i){if(submitted)return;answers[n]=i;render()}
+function showFeedback(q){
+ const f=$("feedback");f.className="feedback";
+ if(uncertain.has(q.n)||!q.a.length){f.classList.add("info");f.textContent=explanations[q.n]||"Câu này cần đối chiếu đáp án chính thức; không tính vào điểm tham khảo."}
+ else if(q.a.includes(answers[q.n])){f.classList.add("good");f.textContent="Chính xác! Đáp án: "+q.a.map(i=>"ABCD"[i]).join(", ")+ "."}
+ else{f.classList.add("bad");f.textContent="Chưa chính xác. Đáp án tham khảo: "+q.a.map(i=>"ABCD"[i]).join(", ")+ "."}
+}
+function updateStats(){let done=list.filter(n=>answers[n]!==undefined).length;$("answered").textContent=done;$("remaining").textContent=list.length-done;$("bar").style.width=(done/list.length*100)+"%"}
+function setFilter(f){activeFilter=f;list=BANK.filter(q=>f==="all"||group(q.n)===f).map(q=>q.n);idx=0;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.filter===f));$("scope").value=f;render();$("result").classList.add("hidden")}
+function reset(){answers={};marked.clear();submitted=false;seconds=3600;$("result").classList.add("hidden");$("submit").disabled=false;render();startTimer()}
+function grade(){
+ submitted=true;clearInterval(timerId);let eligible=list.filter(n=>!uncertain.has(n)&&BANK[n-1].a.length);
+ let correct=eligible.filter(n=>answers[n]!==undefined&&BANK[n-1].a.includes(answers[n])).length;
+ let wrong=eligible.filter(n=>answers[n]!==undefined&&!BANK[n-1].a.includes(answers[n])).length;
+ let blank=eligible.filter(n=>answers[n]===undefined).length;
+ let pct=eligible.length?Math.round(correct/eligible.length*100):0;
+ $("result").classList.remove("hidden");
+ $("result").innerHTML=`<h2>Kết quả bài làm</h2><div class="score">${correct}/${eligible.length}</div><p>Đúng: <b>${correct}</b> · Sai: <b>${wrong}</b> · Chưa làm: <b>${blank}</b> · Tỷ lệ đúng: <b>${pct}%</b></p><p class="small">Các câu ${[...uncertain].join(", ")} được tạm loại khỏi điểm vì đáp án/diễn đạt cần xác minh.</p><button class="primary" id="showAll">Xem lại đáp án và lời giải lưu ý</button>`;
+ $("showAll").onclick=()=>{let bad=list.filter(n=>answers[n]===undefined||uncertain.has(n)||!BANK[n-1].a.includes(answers[n]));if(!bad.length)bad=list;list=bad;idx=0;render()};
+ $("submit").disabled=true;render();
+}
+function startTimer(){clearInterval(timerId);timerId=setInterval(()=>{if(submitted)return;seconds--;let m=Math.floor(seconds/60),s=seconds%60;$("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");if(seconds<=0)grade()},1000)}
+$("prev").onclick=()=>{idx=Math.max(0,idx-1);render()};$("next").onclick=()=>{idx=Math.min(list.length-1,idx+1);render()};
+$("clear").onclick=()=>{delete answers[current().n];render()};
+$("mark").onclick=()=>{let n=current().n;marked.has(n)?marked.delete(n):marked.add(n);render()};
+$("submit").onclick=()=>{if(confirm("Bạn chắc chắn muốn nộp bài?"))grade()};
+$("review").onclick=()=>{list=list.filter(n=>answers[n]===undefined||uncertain.has(n)||!BANK[n-1].a.includes(answers[n]));if(!list.length)list=BANK.map(q=>q.n);idx=0;render()};
+$("reset").onclick=reset;
+$("shuffle").onclick=()=>{list.sort(()=>Math.random()-.5);idx=0;render()};
+$("scope").onchange=e=>setFilter(e.target.value);
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setFilter(b.dataset.filter));
+$("mode").onchange=()=>{render()};
+render();startTimer();
+</script>
+</body></html>
